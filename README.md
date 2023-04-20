@@ -38,3 +38,15 @@ $ source venv/bin/activate (or .\venv\Scripts\activate on Windows)
 $ pip install -r requirements.txt
 $ flask --app app --debug run
 ```
+
+Also remember to run so that you can use Flask Migrate
+```bash
+$ pip install Flask-Migrate
+```
+
+Some important commands to remember
+```bash
+$ flask db init  ----This is used to initialize the database allowing you to use flask migrate
+$ flask db migrate -m "Whatever description you feel like adding" ---- This is used to create the migration and add a description to it
+$ flask db upgrade ---- This applies the migration to your database
+```
