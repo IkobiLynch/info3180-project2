@@ -5,7 +5,8 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app, db, login_manager
+from functools import wraps
+from app import app, db
 from flask import render_template, request, jsonify, send_file, send_from_directory, flash, url_for, redirect, session, abort
 import os
 import json
@@ -13,6 +14,7 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from app.models import Posts, Likes, Follows, Users
 from flask_login import login_user, logout_user, current_user, login_required
+from flask_sqlalchemy import SQLAlchemy
 # from app.forms import
 import jwt
 
@@ -41,36 +43,35 @@ import jwt
 #   return decorated
 
 def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.headers.get('Authorization', None) # or request.cookies.get('token', None) 
+  @wraps(f)
+  def decorated(*args, **kwargs):
+    auth = request.headers.get('Authorization', None) # or request.cookies.get('token', None)
 
-    
-        if not auth:
-            return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
+    if not auth:
+      return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
 
-        parts = auth.split()
+    parts = auth.split()
 
-        if parts[0].lower() != 'bearer':
-            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
-        elif len(parts) == 1:
-            return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
-        elif len(parts) > 2:
-            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+    if parts[0].lower() != 'bearer':
+      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
+    elif len(parts) == 1:
+      return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
+    elif len(parts) > 2:
+      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
 
-        token = parts[1]
-        try:
-            payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+    token = parts[1]
+    try:
+        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
 
-        except jwt.ExpiredSignatureError:
-            return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
-        except jwt.DecodeError:
-            return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
+    except jwt.ExpiredSignatureError:
+        return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
+    except jwt.DecodeError:
+        return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
 
-        g.current_user = user = payload
-        return f(*args, **kwargs)
+    g.current_user = user = payload
+    return f(*args, **kwargs)
 
-    return decorated
+  return decorated
 
 
 @app.route('/')
@@ -81,7 +82,7 @@ def index():
 def getcsrf():
     return jsonify({'csrf_token': generate_csrf()})
 
-@app.route('api/v1/register', methods=['POST'])
+@app.route('/api/v1/register', methods=['POST'])
 def register():
     #form = 
     if request.method=="POST":
@@ -126,6 +127,7 @@ def login():
                 # session['userid'] = user.id
                 payload = {'sub': user.email, "iat":timestamp, "exp": timestamp + timedelta(minutes = 30)}
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm = 'HS256')
+                login_user()
                 return jsonify(message = 'User successfully logged in.', token=token)
             return jsonify(errors="Invalid username or password")
         return jsonify(errors=form_errors(form))
