@@ -17,6 +17,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 # from app.forms import
 import jwt
+import psycopg2
 
 ###
 # Routing for your application.
@@ -86,29 +87,38 @@ def getcsrf():
 def register():
     #form = 
     if request.method=="POST":
-        if form.validate_on_request:
-            try:
-                username = form.username.data
-                password = form.password.data
-                firstname = form.firstname.data
-                lastname = form.lastname.data
-                email  = form.email.data
-                location = form.location.data
-                biography = form.biography.data
-                profile_photo = form.profile_photo.data
-                # joined_on = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                filename= secure_filename(profile_photo.filename)
-                profile_photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                if isAPhoto(filename):
+        # if form.validate_on_request:
+        try:
+            # data= request.json
+            username = request.form["username"]
+            password = request.form["password"]
+            firstname= request.form["firstname"]
+            lastname= request.form["lastname"]
+            email = request.form["email"]
+            location = request.form['location']
+            biography = request.form["biography"]
+            profile_photo = request.files['profile_photo']
+
+            # password = form.password.data
+            #     firstname = form.firstname.data
+            #     lastname = form.lastname.data
+            #     email  = form.email.data
+            #     location = form.location.data
+            #     biography = form.biography.data
+            #     profile_photo = form.profile_photo.data
+            # joined_on = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            filename=secure_filename(username + "_" + profile_photo.filename)
+            profile_photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if isAPhoto(filename):
                     user= Users(username=username, password= password, firstname= firstname, lastname = lastname, email = email, location =  location, biography = biography, profile_photo = filename)
                     db.session.add(user)
                     db.session.commit()
                     flash("You have registered sucessfully!","success")
                     return jsonify(message="User created successfully"), 201
             #username, password, firstname, lastname, email, location, biography, profile_photo
-                else:
+            else:
                     flash("The file you uploaded is not a photo","error")
-            except Exception as e:
+        except Exception as e:
                 db.session.rollback()
                 return jsonify(message="Error creating user: " + str(e))
     return jsonify(errors=form_errors(form))
@@ -118,65 +128,72 @@ def register():
 def login():
     # form = LoginForm()
     if request.method=="POST":
-        if form.validate_on_submit():
-            username = form.username.data
-            password = form.password.data
+        try:
+            username = request.form['username']
+            password = request.form['password']
             timestamp= datetime.utcnow()
             user = Users.query.filter_by(username=username).first()
             if user is not None and user.check_password_hash(user.password, password):
                 # session['userid'] = user.id
                 payload = {'sub': user.email, "iat":timestamp, "exp": timestamp + timedelta(minutes = 30)}
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm = 'HS256')
-                login_user()
+                login_user(user)
                 return jsonify(message = 'User successfully logged in.', token=token)
             return jsonify(errors="Invalid username or password")
-        return jsonify(errors=form_errors(form))
-    return jsonify(errors=form_errors(form))
+        except Exception as e:
+            return jsonify(errors='An error occurred while processing your request'), 500
+    return jsonify(errors='Invalid request method'), 405
 
 @app.route('/api/auth/logout', methods = ['GET'])
 @requires_auth
 @login_required
 def logout():
     logout_user()
-    session.clear()
+    # session.clear()
     return jsonify(message = "User sucessfully logged out.")
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['POST'])
 @requires_auth
-@login_required
+# @login_required
 def createPost(user_id):
     #form = CreatePost()
     if request.method=="POST":
-        if form.validate_on_submit():
-            photo = form.photo.data
-            caption = form.description.data
+        try:
+            photo = request.files["photo"]
+            caption = request.form["caption"]
             #created_on = datetime.utcnow()
             filename = secure_filename(photo.filename)
-            try:
-                post= Posts(caption=caption, photo = filename, user_id= user_id)
-                db.session.add(post)
-                db.session.commit()
-                return jsonify(message="Successfully created a new post"), 201
-            except Exception as e:
+            post= Posts(caption=caption, photo = filename, user_id= user_id)
+            db.session.add(post)
+            db.session.commit()
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return jsonify(message="Successfully created a new post"), 201
+            # return jsonify(message="Successfully created a new post"), 201
+        except Exception as e:
                 db.session.rollback()
                 return jsonify(errors = f"Error creating post: {e}")
-        else:
-            return jsonify(errors=form_errors(form))
-    return jsonify(errors=form_errors(form))
+    else:
+        return jsonify(errors = "Invalid request method"), 405
 
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['GET'])
-@login_required
+# @login_required
 @requires_auth
 def getUserPost(user_id):
     if request.method=="GET":
-            temp = Posts.query.filter_by(user_id=user_id).all()
-            posts= []
-            for post in temp:
-                p={"id":post.id, "user_id": post.user_id, "photo": post.photo,"description": post.caption, "created_on":post.created_on }
-                posts.append(p)
-            return jsonify(posts= posts)
-    return jsonify(errors=form_errors(form))
+            try:
+                temp = Posts.query.filter_by(user_id=user_id).all()
+                posts= []
+                for post in temp:
+                    p={"id":post.id, "user_id": post.user_id, "photo": post.photo,"description": post.caption, "created_on":post.created_on }
+                    posts.append(p)
+                if posts is None:
+                    return jsonify(message="No posts found")
+                return jsonify(posts= posts)
+            except Exception as e:
+                print(e)
+                return jsonify(message="Error retrieving posts")
+    return jsonify(errors = "Invalid request method"), 405
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @login_required
@@ -200,10 +217,10 @@ def follow(user_id):
             else:
                 return jsonify(errors = f"You can't follow yourself.")
     else:
-        return jsonify(errors=form_errors(form))
+         return jsonify(errors = "Invalid request method"), 405
 
 @app.route('/api/v1/posts', methods=['GET'])
-@login_required
+# @login_required
 @requires_auth
 def getPosts():
     if request.method=="GET":
@@ -215,7 +232,7 @@ def getPosts():
             p={"id":id, "user_id": post.user_id, "photo": post.photo,"caption": post.caption, "created_on":post.created_on,"likes":likes}
             posts.append(p)
         return jsonify(posts= posts)
-    return jsonify(errors=form_errors(form))
+    return jsonify(errors = "Invalid request method"), 405
 
 
 @app.route('/api/v1/posts/<post_id>/like', methods=['POST'])
@@ -235,7 +252,7 @@ def likePost(post_id):
             totallikes= Likes.query.filter_by(post_id = post_id).count()
             db.session.commit()
             return jsonify(message="You removed your like from this post.", likes=totallikes)
-    return jsonify(errors=form_errors(form))
+    return jsonify(errors = "Invalid request method"), 405
             
 
 ###
