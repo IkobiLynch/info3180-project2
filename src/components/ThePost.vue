@@ -1,28 +1,27 @@
 <template>
     <main>
-        <div class="container col-sm-10 col-md-12">
-            <div v-bind:post="post" class="card post">
+        <div class="container col-sm-12 col-md-9">
+            <div class="card post">
                 <div class="header">
                     <div class="flex-start">
                         <img src="" alt="">
-                        { post.username }
+                        {{ post.value.username }}
                     </div>
                 </div>
                 <div class="card-image">
-                    <img class="" src="{ post.image_url }" alt="post image">
+                    <img class="" :src="post.value.image_url" alt="post image">
                 </div>
                 <div class="card-body">
                     <p class="card-text">
-                        { post.caption }
-                        
+                        {{ post.value.caption }}
                     </p>
                 </div>
-                <div class="footer">
+                <div class="container footer">
                     <span class="float-start">
-                        <img src="" alt="">{ post.likes } likes
+                        <img src="" alt="">{{ post.value.likes }} likes
                     </span>
                     <span class="float-end">
-                        { post.date }
+                        {{ post.value.date }}
                     </span>
                 </div>
             </div>
@@ -36,7 +35,11 @@
     let props = defineProps(['post']);
 </script>
 
-<style>
+<style scope>
+    .card {
+        width: 100%;
+    }
+
     .card-header {
         height:fit-content;
     }

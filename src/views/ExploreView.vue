@@ -6,15 +6,18 @@
   let posts:any = ref([]);
   let user_id:string  = localStorage['id'];
   
-  let image = ref(new Blob());
-  let caption = ref("");
-  let post = ref(
-    {
-      id: user_id,
-      image: image,
-      caption: caption
-    }
-  );
+  let image_url = ref("/src/assets/images/home-card-image.jpg");
+  let caption = ref("test caption...");
+  let likes = ref("1");
+  let date= ref("24 April 2018");
+
+  let post = ref({
+    username:"test_user",
+    image_url:image_url,
+    caption:caption,
+    likes:likes,
+    date:date
+  });
   
   let url:string = `/api/v1/${user_id}/posts`; 
 
@@ -58,13 +61,7 @@
             }
         });
     } else {
-        posts.value = [{
-          username:"user",
-          image_url:"/api/v1/1",
-          caption:"test caption",
-          likes:2,
-          date:"2012-12-12",
-        }];
+      posts.value.push(post);
     }
 
   });
@@ -73,6 +70,6 @@
 
 <template>
   <main>
-    <ThePost v-for="post, index in posts" v-bind:key="index" />
+    <ThePost v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" />
   </main>
 </template>

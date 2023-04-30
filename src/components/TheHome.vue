@@ -46,7 +46,7 @@
   </div>
 </template>
 
-<style>
+<style scope>
   @import url('https://fonts.googleapis.com/css2?family=Lobster');
   .card {
     width:48%;
@@ -59,7 +59,7 @@
 
   .btn {
     justify-content: center;
-    width: 40%;
+    width: 45%;
   }
 
   #camera {
