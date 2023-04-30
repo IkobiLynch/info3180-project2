@@ -59,7 +59,7 @@
 
   .btn {
     justify-content: center;
-    width: 200px;
+    width: 40%;
   }
 
   #camera {
@@ -69,6 +69,7 @@
 
   #home-card-photo {
     width: 100% !important;
+    height:350px !important;
     border-radius: 5px !important;
   }
 
