@@ -26,10 +26,10 @@
                 <RouterLink class="text-white" to="/explore">Explore</RouterLink>
               </li>
               <li v-if="login" >
-                <RouterLink class="text-white" v-bind:id='id' to="{name:'profile', params:{user_id:id}}">My Profile</RouterLink>
+                <RouterLink class="text-white" v-bind:id='id' :to="`/users/${id}`">My Profile</RouterLink>
               </li>
               <li v-if="login" >
-                <RouterLink class="text-white" to="/logout">Logout</RouterLink>
+                <a class="text-white" href="" @click="logout">Logout</a>
               </li>
             </ul>
           </div>
@@ -43,11 +43,39 @@
   import { RouterLink } from "vue-router";
   let login:boolean = localStorage['token']? true : false;
   let id: number = localStorage['id'] ?? 0;
+
+  function logout() {
+    const url: string = "/api/v1/auth/logout"; 
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            // 'Accept': 'application/json',
+            // 'Content-Type': 'application/json',
+            'Authentication': `bearer ${localStorage['token']}`
+        }
+    })
+    .then((result)=>{
+        const res = result.json();
+        return res;
+    })
+    .then((data)=>{
+        // do something with the data
+
+        // update the token and id in localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('id');
+        window.location.assign("/");
+    });
+  }
 </script>
 
-<style>
+<style scoped>
   /* Add any component specific styles here */
   @import url('https://fonts.googleapis.com/css2?family=Lobster');
+
+  .navbar {
+    margin-bottom: 30px;
+  }
   .navbar-brand {
     font-family: 'Lobster', sans-serif;
   }
@@ -70,8 +98,8 @@
   }
 
   li {
-    width:70px;
-    /* margin-left: 20px; */
+    width:80px;
+    margin: 0 10px;
   }
 
   .menu {

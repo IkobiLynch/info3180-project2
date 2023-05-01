@@ -3,7 +3,7 @@
         <div class="container col-sm-6">
             <h5>Register</h5>
             <div class="form">
-                <form action="/api/v1/register" id="register" enctype="multipart/form-data" method="POST">
+                <form id="register" enctype="multipart/form-data" method="POST">
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input id="username" name="username" type="text" class="form-control">
@@ -36,35 +36,39 @@
                         <label for="profile_photo">Photo</label>
                         <input id="profile_photo" name="profile_photo" type="file" class="form-control">
                     </div>
-                    <button @click="register" class="btn btn-primary">Register</button>
+                    <button @click="register" class="btn btn-primary" value="save">Register</button>
                 </form>
             </div>
         </div>
     </main>
 </template>
 
-<script setup lang="ts">
+<script setup >
 
     // let registration_form = new FormData(document.querySelector('#register'));
 
-    function register() {
-        console.log("registration form");
-        let form = new FormData($('#register'));
-        let url:string = "/api/v1/register";
+    function register(event) {
+        event.preventDefault();
+
+        let form = new FormData($('form#register')[0])
+        let url = "/api/v1/register";
 
         fetch(url, {
             method: 'POST',
             headers: {
-                'Authentication': `bearer ${localStorage['token']}`
+                // 'Content-Type': 'application/json'
             },
             body: form
         })
         .then(result => result.json())
         .then((data) => {
-            if (data.status_code==200) {
-                console.log('user followed');
+            if (data.message==="User created successfully") {
+                console.log('user registered');
+                window.location.assign('/login');
+                
             } else {
-                console.log('failed to follow user');
+                console.log('failed to register user');
+                $('form#register').trigger('reset');
             }
         })
     }

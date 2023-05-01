@@ -8,13 +8,19 @@
             </ul>
             <span v-else>{{ message }}</span>
         </div>
-        <LoginForm @fail="fail"/>
+        <LoginForm :id="id" v-if="!id" @success='success' @fail="fail"/>
     </div> </main>
 </template>
 
 <script setup lang="ts">
     import LoginForm from './LoginForm.vue';
     import { ref } from 'vue';
+
+    let id:string = localStorage['id'];
+
+    if (localStorage['id']) {
+        window.location.replace(`/users/${id}`)
+    } 
 
     let displayAlerts = ref(false);
     let status = ref("");
@@ -27,6 +33,10 @@
         status.value = "error";
         errors.value = e;
         message.value = m;
+    }
+
+    function success() {
+        location.replace(`/users/${localStorage['id']}`)
     }
 </script>
 

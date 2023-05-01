@@ -1,7 +1,7 @@
 <template>
     <h3 class="h3">Login</h3>
     <div class="container form-container">
-        <form class="col-sm-12" id="movieForm" action="" method="post" @submit.prevent="login">
+        <form class="col-sm-12" id="loginForm" action="" method="post" @submit.prevent="login">
             <div class="form-group mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input v-model="login_un" type="text" id="username" name="username" class="form-control" maxlength="80" />
@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+    
     import { ref } from "vue";
 
     const emits = defineEmits<{
@@ -52,41 +53,43 @@
     }
 
     function login() {
+        if (!localStorage['id']) {
+            const data = new FormData($('form#loginForm')[0]);
+            const url = "/api/v1/auth/login";
+    
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    // 'Accept': 'application/json'
+                },
+                body: data
+            })
+            .then(function (response: any): any {
+                const res = response.json();
+                return res;
+            })
+            .then((data) => {
+                if (data.status!=="success") {
+                    // recover from fail with some operation or message
+                    status.value = "error";
+                    errors.value = data.errors;
+                    message.value = data.message;
+                    console.log("login failed");
+                    fail();
+                } else {
+                    status.value = "success";
+                    clearLogin();
+                    // persistent storage of authorization token
+                    localStorage["token"] = data.token ;
+                    let id = localStorage["id"] = data.id ;
+                    success();
+                    clear();
+                    console.log("login successful");
+                    window.location.replace(`/users/${id}`);
+                }
+            });
+        }
 
-        const data = {
-            "user_name":login_un.value,
-            "password":login_pw.value
-        };
-        const url = "/api/v1/auth/login";
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(function (response: any): any {
-            const res = response.json();
-            if (response.status!==200) {
-                // recover from fail with some operation or message
-                status.value = "error";
-                errors.value = res.errors;
-                message.value = res.message;
-                console.log("login failed");
-                fail();
-            } else {
-                status.value = "success";
-                clearLogin();
-                // persistent storage of authorization token
-                localStorage["token"] = res.data ;
-                localStorage["id"] = res.id ;
-                success();
-                clear();
-            }
-
-        });
-        
     }
     
 
@@ -108,5 +111,9 @@
 
     .h3 {
         margin-bottom: 20px;
+    }
+
+    button {
+        justify-content: center;
     }
 </style>

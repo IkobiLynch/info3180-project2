@@ -10,7 +10,7 @@ class Posts(db.Model):
     caption = db.Column(db.String(200))
     photo = db.Column(db.String(200))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('Users', backref=db.backref('posts', lazy=True))
+    # user = db.relationship('Users', backref=db.backref('posts', lazy=True))
     created_on = db.Column(db.DateTime, default = datetime.now)
 
     def __init__(self, caption, photo, user_id):
@@ -21,7 +21,7 @@ class Posts(db.Model):
 
     def photo_path(self):
         if self.photo:
-            return f'/static/uploads/{self.photo}'
+            return f'uploads/{self.photo}'
         else:
             return None
         
@@ -31,9 +31,9 @@ class Likes(db.Model):
     __tablename__ = 'likes'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    post = db.relationship('Posts', backref=db.backref('likes', lazy=True))
+    # post = db.relationship('Posts', backref=db.backref('likes', lazy=True))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('Users', backref=db.backref('likes', lazy=True))
+    # user = db.relationship('Users', backref=db.backref('likes', lazy=True))
 
     def __init__(self, post_id, user_id):
         self.post_id = post_id
@@ -43,9 +43,9 @@ class Follows(db.Model):
     __tablename__ = "follows"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    follower = db.relationship('Users', backref=db.backref('follows', lazy=True))
+    # follower = db.relationship('Users', backref=db.backref('follows', lazy=True))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('Users', backref=db.backref('likes', lazy=True))
+    # user = db.relationship('Users', backref=db.backref('likes', lazy=True))
 
     def __init__(self, follower_id, user_id):
         self.follower_id = follower_id
@@ -55,14 +55,15 @@ class Users(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100))
-    password = db.Column(db.String(100), unique=True)
-    firstname = db.Column(db.String(75))
-    lastname = db.Column(db.String(75))
+    password = db.Column(db.String(256), unique=True)
+    firstname = db.Column(db.String(80))
+    lastname = db.Column(db.String(80))
     email = db.Column(db.String(200))
     location = db.Column(db.String(200))
-    biography = db.Column(db.Text)
-    profile_photo = db.Column(db.String(100))
+    biography = db.Column(db.String(200))
+    profile_photo = db.Column(db.String(200))
     joined_on = db.Column(db.DateTime, default = datetime.now)
+    
 
     def __init__(self, username, password, firstname, lastname, email, location, biography, profile_photo):
         self.username = username
@@ -77,7 +78,7 @@ class Users(db.Model):
 
     def photo_path(self):
         if self.profile_photo:
-            return f'/static/uploads/{self.profile_photo}'
+            return f'/uploads/{self.profile_photo}'
         else:
             return None
         
