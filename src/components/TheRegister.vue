@@ -3,7 +3,7 @@
         <div class="container col-sm-6">
             <h5>Register</h5>
             <div class="form">
-                <form action="/api/v1/register" id="register" method="POST">
+                <form action="/api/v1/register" id="register" enctype="multipart/form-data" method="POST">
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input id="username" name="username" type="text" class="form-control">
@@ -13,12 +13,12 @@
                         <input id="password" name="password" type="password" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="fname">FirstName</label>
-                        <input id="fname" name="fname" type="text" class="form-control">
+                        <label for="firstname">FirstName</label>
+                        <input id="firstname" name="firstname" type="text" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="lname">LastName</label>
-                        <input id="lname" name="lname" type="text" class="form-control">
+                        <label for="lastname">LastName</label>
+                        <input id="lastname" name="lastname" type="text" class="form-control">
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
@@ -33,8 +33,8 @@
                         <input id="biography" name="biography" type="textarea" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="photo">Photo</label>
-                        <input id="photo" name="photo" type="file" class="form-control">
+                        <label for="profile_photo">Photo</label>
+                        <input id="profile_photo" name="profile_photo" type="file" class="form-control">
                     </div>
                     <button @click="register" class="btn btn-primary">Register</button>
                 </form>
@@ -50,7 +50,7 @@
     function register() {
         console.log("registration form");
         let form = new FormData($('#register'));
-        let url:string = "/api/v1/user.value.id/follow"
+        let url:string = "/api/v1/register";
 
         fetch(url, {
             method: 'POST',
