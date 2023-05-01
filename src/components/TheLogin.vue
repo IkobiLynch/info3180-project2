@@ -1,5 +1,5 @@
 <template>
-    <main> <div class="container col-sm-4">
+    <main> <div class="container col-sm-8 col-lg-5">
         <div v-if="displayAlerts" :class="[(status=='success' || status=='error')? (( status!=='success' ) ? alertDanger : alertSuccess) : 'alert']">
             <ul v-if="status=='error'">
                 <li v-for="(error, indx) in errors" v-bind:errors="errors" v-bind:key="indx">
