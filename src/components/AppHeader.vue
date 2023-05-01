@@ -20,7 +20,7 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto">
               <li>
-                <RouterLink class="text-white" to="/">Home</RouterLink>
+                <RouterLink v-if="!id" v-bind:id='id' class="text-white" to="/">Home</RouterLink>
               </li>
               <li>
                 <RouterLink class="text-white" to="/explore">Explore</RouterLink>
