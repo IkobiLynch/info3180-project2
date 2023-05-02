@@ -246,7 +246,7 @@ def update_exp(id):
     
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['GET'])
-@requires_auth
+@login_required
 def getUserPost(user_id):
     if request.method=="GET":
             try:
@@ -288,28 +288,6 @@ def follow(user_id):
                 return jsonify(errors = f"You can't follow yourself.")
     else:
          return jsonify(errors = "Invalid request method"), 405
-
-# @app.route('/api/users/<user_id>/follow', methods=['POST'])
-# # @login_required
-# @requires_auth
-# def follow(user_id):
-#     if current_user.is_authenticated:
-#         try:
-#             follower_id = current_user.id
-#             followee = Users.query.filter_by(id=user_id).first()
-#             if followee:
-#                 follow = Follows(follower_id=follower_id, user_id=user_id)
-#                 db.session.add(follow)
-#                 db.session.commit()
-#                 return jsonify(message="You are now following that user."), 201
-#             else:
-#                 return jsonify(message="User not found."), 404
-#         except Exception as e:
-#             db.session.rollback()
-#             print(e)
-#             return jsonify(errors=f"Internal Error: {e}")
-#     else:
-#         return jsonify(errors="Authentication required."), 401
 
 
 @app.route('/api/v1/posts', methods=['GET'])
