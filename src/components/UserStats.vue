@@ -1,21 +1,39 @@
 <template>
     <div class="container stats">
         <div class="card">
-            <div class="card-body">
-                <div class="image">
-                    <img :src="user.value.image_url" alt="user avatar">
+            <div class="card-body col-sm-12">
+                <div class="image col-sm-2">
+                    <img :src="user.image_url" alt="user avatar">
                 </div>
-                <div class="details">
-                    <h5 class="h5">{{ user.value.name }}</h5>
+                <div class="details col-sm-7">
+                    <h5 class="h5 card-title">{{ user.firstname }} {{ user.lastname }}</h5>
                     <p>
-                        {{ user.value.city }}, {{ user.value.country }}
-                        <br>
-                        Member since {{ user.value.date }}
+                        <small>
+                            {{ user.loation }}
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            Member since {{ user.date }}
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            {{ user.biography }}
+                        </small>
                     </p>
                 </div>
-                <div class="following">
-                    <span class="float-left">{{ user.posts }}<br/>Posts</span>
-                    <span class="float-right">{{ user.followers }}<br/>Followers</span>
+                <div class="flex-column col-sm-3">
+                    <div class="following">
+                        <div id="posts" class="socials float-left">
+                            <span class="small">{{ user.posts }}</span>
+                            <span class="h6">Posts</span>
+                        </div>
+                        <div id="followers" class="socials float-right">
+                            <span class="small">{{ user.followers }}</span>
+                            <span class="h6">Followers</span>
+                        </div>
+                    </div>
                     <button id="follow-btn" class="btn btn-primary" @click="follow">Follow</button>
                 </div>
             </div>
@@ -34,8 +52,23 @@
     }
 </script>
 <style scope>
-    .card-body {
+    .card-body, .following {
         display: flex;
         flex-direction: row;
+    }
+
+    .card {
+        height: 10rem;
+    }
+
+    .following {
+        text-align: center;
+    }
+
+    .socials {
+        width: 45%;
+        display:flex;
+        flex-direction: column;
+        padding: 1px 1px;
     }
 </style>

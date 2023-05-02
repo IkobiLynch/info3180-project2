@@ -46,6 +46,8 @@ import psycopg2
 #         return t(*args, **kwargs)
 #   return decorated
 
+ACTIVE = {}
+
 def requires_auth(f):
   @wraps(f)
   def decorated(*args, **kwargs):
@@ -79,7 +81,10 @@ def requires_auth(f):
 
 @login_manager.user_loader
 def load_user(id):
-    return db.session.execute(db.select(Users).filter_by(id=id)).scalar()
+    user = db.session.execute(db.select(Users).filter_by(id=id)).scalar()
+    if user is not None:
+        ACTIVE[id] = user
+    return user
 
 @app.route('/')
 def index():
@@ -122,11 +127,8 @@ def register():
 
 @app.route('/api/v1/auth/login', methods=['POST'])
 def login():
-    # form = LoginForm()
     if request.method=="POST":
         try:
-            # username = request.form['username']
-            # password = request.form['password']
             data = LoginForm()
             username = data.username.data
             password = data.password.data
@@ -134,10 +136,10 @@ def login():
             user = Users.query.filter_by(username=username).first()
             print(user)
             if user is not None and check_password_hash(user.password, password):
-                # session['userid'] = user.id
-                payload = {'sub': user.id, "iat":timestamp, "exp": timestamp + timedelta(minutes = 30)}
+                payload = {'sub': user.id, "iat":timestamp, "exp": timestamp+timedelta(days=7)}
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm = 'HS256')
-                login_user(user)
+                if login_user(user):
+                    load_user(user.id)
                 return jsonify(status='success', message = 'User successfully logged in.', id=user.id, token=token)
             return jsonify(errors="Invalid username or password")
         except Exception as e:
@@ -148,11 +150,16 @@ def login():
 
 
 @app.route('/api/v1/auth/logout', methods = ['POST','GET'])
-@requires_auth
-# @login_required
+@login_required
 def logout():
     try:
-        
+        token = request.headers.get('Authorization').split(" ")
+        if len(token) == 2:
+            if token[0].lower() == "bearer":
+                payload = jwt.decode(token[1])
+                user_id = ACTIVE.get(payload.get('sub'), None)
+                if user_id is not None:
+                    ACTIVE.pop(user_id)
         logout_user()
         return jsonify(message = "User sucessfully logged out.")
     except Exception as e:
@@ -160,12 +167,43 @@ def logout():
         return jsonify(errors='An error occurred while processing your request'), 500
 
 
-
+@app.route('/api/v1/users/<userid>', methods=["GET"])
+# @requires_auth
+def user_profile(userid):
+    userid = eval(userid)
+    token = request.headers.get('Authorization')
+    parts = token.split()
+    if len(parts) == 2:
+        if parts[0].lower() == "bearer":
+            try:
+                payload = jwt.decode(parts[1], app.config['SECRET_KEY'], algorithms=["HS256"])
+                user = ACTIVE.get(userid, None)
+                user_id = payload.get('sub')
+                if user is not None and userid == user_id:
+                    followers = db.session.query(Follows).filter_by(user_id=user_id).count()
+                    posts = db.session.query(Posts).filter_by(user_id=user_id).count()
+                    data = {
+                        "firstname":user.firstname,
+                        "lastname":user.lastname,
+                        "email":user.email,
+                        "location":user.location,
+                        "biography":user.biography,
+                        "username":user.username,
+                        "posts": posts,
+                        "followers": followers,
+                        "date": user.joined_on.strftime("%d %b %Y"),
+                        "image_url": user.profile_photo
+                    }
+                    return jsonify(status="success", user=data)
+            except jwt.ExpiredSignatureError:
+                return jsonify(status="error", type="expired", message="Expired Token")
+        else:
+            return jsonify(status="error", type="invalid_token", message="Invalid Token type")
+    return jsonify(status="error", type="invalid_authorization", message="Unable to fulfill request")
 
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['POST'])
-@requires_auth
-# @login_required
+@login_required
 def createPost(user_id):
     #form = CreatePost()
     if request.method=="POST":
@@ -187,17 +225,25 @@ def createPost(user_id):
         return jsonify(errors = "Invalid request method"), 405
 
 @app.route("/api/v1/generate-token")
+@login_required
 def generate_token():
     timestamp = datetime.utcnow()
-    payload = {
-        "sub": 1,
-        "iat": timestamp,
-        "exp": timestamp + timedelta(minutes=30)
-    }
+    if current_user is not None:
+        payload = {
+            "sub": current_user.id,
+            "iat": timestamp,
+            "exp": timestamp + timedelta(days=7)
+        }
 
     token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
 
     return jsonify(token=token)
+
+
+def update_exp(id):
+    exp = ACTIVE[id]
+    exp = exp + timedelta(days=7)
+    
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['GET'])
 @requires_auth
