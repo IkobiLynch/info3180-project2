@@ -46,7 +46,7 @@
         .then((json_obj)=>{
             if (json_obj.status == "success") {
                 let data = json_obj.user;
-                let image_url = data.profile_photo;
+                let image_url = data.image_url;
                 let firstname = data.firstname;
                 let lastname = data.lastname;
                 let city = data.location;

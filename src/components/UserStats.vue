@@ -1,11 +1,11 @@
 <template>
     <div class="container stats">
         <div class="card">
-            <div class="card-body col-sm-12">
+            <div class="card-body col-sm-12 flex-row">
                 <div class="image col-sm-2">
-                    <img :src="user.image_url" alt="user avatar">
+                    <img class="col-sm-12" :src="`../../uploads/${user.image_url}`" alt="user avatar">
                 </div>
-                <div class="details col-sm-7">
+                <div class="details col-sm-7 flex-column">
                     <h5 class="h5 card-title">{{ user.firstname }} {{ user.lastname }}</h5>
                     <p>
                         <small>
@@ -57,8 +57,14 @@
         flex-direction: row;
     }
 
+    .image {
+        padding: 0 15px 0 0;
+        margin:auto;
+    }
+
     .card {
         height: 10rem;
+        box-shadow: 2px 2px 2px gray;
     }
 
     .following {
