@@ -63,7 +63,7 @@
     }
 
     .card {
-        height: 10rem;
+        height: fit-content;
         box-shadow: 2px 2px 2px gray;
     }
 
@@ -76,5 +76,10 @@
         display:flex;
         flex-direction: column;
         padding: 1px 1px;
+    }
+
+    #follow-btn {
+        margin-top: 50px;
+        width: 100%;
     }
 </style>
