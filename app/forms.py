@@ -19,3 +19,8 @@ class LoginForm (FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=2, max=80)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=2, max=80)])
     
+
+class PostForm (FlaskForm):
+    caption = StringField('Caption', validators=[InputRequired(), Length(min=2, max=200)])
+    photo = FileField('Photo', validators=[FileRequired(), FileSize(max_size=4000000), FileAllowed(["jpg", "png"], message="Image Files Only!")])
+    

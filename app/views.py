@@ -7,7 +7,7 @@ This file creates your application.
 
 from functools import wraps
 from app import app, db, login_manager
-from app.forms import UserForm, LoginForm
+from app.forms import UserForm, LoginForm, PostForm
 from flask import g
 from flask import render_template, request, jsonify, send_file, send_from_directory, flash, url_for, redirect, session, abort
 import os
@@ -205,15 +205,19 @@ def user_profile(userid):
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['POST'])
 @login_required
-def createPost(user_id):
-    #form = CreatePost()
-    if request.method=="POST":
+def create_post(user_id):
+    form = PostForm()
+    
+    if request.method=="POST" and form.validate_on_submit:
         try:
-            photo = request.files["photo"]#  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
-            data = request.get_json()
-            caption= data["caption"]
-            filename = secure_filename(photo.filename)#  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
-            post= Posts(caption=caption, photo = filename, user_id= user_id)#  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
+            photo = request.files["photo"] or form.photo.data #  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
+            caption= form.caption.data.strip()
+            
+            file_in = secure_filename(photo.filename)
+            name, ext = file_in.split(".") 
+            filename = name + "_" + datetime.strftime(datetime.now(),"%Y-%m-%dT%H-%M-%S") + f".{ext}"
+
+            post= Posts(caption=caption, photo = filename, user_id= user_id) #  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
             db.session.add(post)
             db.session.commit()
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) #  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
@@ -309,23 +313,28 @@ def getPosts():
 
 @app.route('/api/v1/posts/<post_id>/like', methods=['POST']) # Currently not functional. Currently working on it to get it working
 @login_required
-@requires_auth
-def likePost(post_id):
+# @requires_auth
+def like_post(post_id):
     if request.method=="POST":
-        likes= Likes.query.filter_by(post_id = post_id, user_id=current_user.id).count()
-        if likes == 0:
-            like = Likes(post_id=post_id, user_id=current_user.id)
-            totallikes= Likes.query.filter_by(post_id = post_id).count()
-            db.session.add(like)
-            db.session.commit()
-            return jsonify(message="Post liked!", likes=totallikes)
-        else:
-            Likes.query.filter_by(post_id = post_id, user_id=current_user.id).delete()
-            totallikes= Likes.query.filter_by(post_id = post_id).count()
-            db.session.commit()
-            return jsonify(message="You removed your like from this post.", likes=totallikes)
+        like = Likes(post_id=post_id, user_id=current_user.id)
+        db.session.add(like)
+        db.session.commit()
+        return jsonify(status="success", message="Post liked!"), 200
     return jsonify(errors = "Invalid request method"), 405
             
+
+@app.route('/api/v1/posts/<post_id>/unlike', methods=['POST']) # Currently not functional. Currently working on it to get it working
+@login_required
+# @requires_auth
+def unlike_post(post_id):
+    if request.method=="POST":
+        # find like and delete it
+        like = db.session.query(Likes).filter_by(post_id=post_id, user_id=current_user.id)
+        db.session.delete(like)
+        db.session.commit()
+        return jsonify(status="success", message="Post unliked!"), 200
+    return jsonify(errors = "Invalid request method"), 405
+
 
 ###
 # The functions below should be applicable to all Flask apps.
