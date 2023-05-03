@@ -1,10 +1,6 @@
 <template>
-    <main>
-        <div class="container">
-            <UserStats v-bind:user="user" />
-            <UserPhotos v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" />
-        </div>
-    </main>
+    <UserStats v-bind:user="user" />
+    <UserPhotos v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" />
 </template>
 <script setup lang="ts">
     import { ref, onMounted } from 'vue'
@@ -15,10 +11,10 @@
     let photos = ref([]);
     let user = ref({});
     let id:string = localStorage['id'];
-    let posts_url:string = `/api/v1/users/${id}/posts`;
-    let user_url:string = `/api/v1/users/${id}`;
 
+    
     onMounted(() => {
+        let user_url:string = `/api/v1/users/${id}`;
 
         fetch(user_url,{
             method:'GET',
@@ -35,8 +31,7 @@
                 let image_url = data.image_url;
                 let firstname = data.firstname;
                 let lastname = data.lastname;
-                let city = data.location;
-                let country = data.location;
+                let location = data.location;
                 let date = data.date;
                 let posts = data.posts;
                 let followers = data.followers;
@@ -46,8 +41,7 @@
                     image_url: image_url,
                     firstname: firstname,
                     lastname: lastname,
-                    city: city,
-                    country: country,
+                    location: location,
                     date: date,
                     posts: posts,
                     followers: followers,
@@ -70,4 +64,3 @@
     }
 
 </script>
-<style scoped></style>

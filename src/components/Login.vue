@@ -1,9 +1,0 @@
-<template>
-  <h1>Login</h1>
-  <form action="/login" method="post">
-    <label for="username">Username</label>
-    <input type="text" name="username" id="username" />
-    <label for="password">Password</label>
-    <input type="submit" value="Login" />
-  </form>
-</template>

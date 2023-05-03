@@ -169,6 +169,8 @@ def logout():
 
 # @requires_auth
 @app.route('/api/v1/users/<userid>', methods=["GET"])
+# @requires_auth
+# @login_required
 def user_profile(userid):
     userid = eval(userid)
     token = request.headers.get('Authorization')
@@ -194,8 +196,11 @@ def user_profile(userid):
                         "date": user.joined_on.strftime("%d %b %Y"),
                         "image_url": user.profile_photo
                     }
+                    posts = []
                     photos = db.session.query(Posts.photo).filter_by(user_id=user_id).all()
-                    return jsonify(status="success", user=data, photos=photos)
+                    for image in photos:
+                        posts.append(image[0])
+                    return jsonify(status="success", user=data, photos=posts)
             except jwt.ExpiredSignatureError:
                 return jsonify(status="error", type="expired", message="Expired Token")
         else:
@@ -311,9 +316,8 @@ def getPosts():
     return jsonify(errors = "Invalid request method"), 405
 
 
-@app.route('/api/v1/posts/<post_id>/like', methods=['POST']) # Currently not functional. Currently working on it to get it working
+@app.route('/api/v1/like/<post_id>', methods=['POST']) # Currently not functional. Currently working on it to get it working
 @login_required
-# @requires_auth
 def like_post(post_id):
     if request.method=="POST":
         like = Likes(post_id=post_id, user_id=current_user.id)
@@ -323,9 +327,8 @@ def like_post(post_id):
     return jsonify(errors = "Invalid request method"), 405
             
 
-@app.route('/api/v1/posts/<post_id>/unlike', methods=['POST']) # Currently not functional. Currently working on it to get it working
+@app.route('/api/v1/unlike/<post_id>', methods=['POST']) # Currently not functional. Currently working on it to get it working
 @login_required
-# @requires_auth
 def unlike_post(post_id):
     if request.method=="POST":
         # find like and delete it

@@ -1,5 +1,5 @@
 <template>
-    <main>
+    <div id="component" class="container">
         <div class="card col-sm-12 col-md-9">
             <div class="card-header">
                 <div class="profile_pic flex-start">
@@ -17,28 +17,44 @@
             </div>
             <div class="container footer">
                 <span class="likes float-start">
-                    <img v-if="post.liked" src="../components/icons/full_heart.png" alt="like"/>
-                    <img v-else src="../components/icons/empty_heart.png" alt="like"/>
+                    <img v-if="post.liked" class="full" src="../components/icons/full_heart.png" alt="like post" @click="unlike(post.id)" />
+                    <img v-else class="empty" src="../components/icons/empty_heart.png" alt="unliked post" @click="like(post.id)" />
                     <small>{{ post.likes }} likes</small>
                 </span>
-                <span class="float-end">
+                <span class="date float-end">
                     <small>{{ post.created_on }}</small>
                 </span>
             </div>
         </div>
-    </main>
+    </div>
 
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue'
     let props = defineProps(['post']);
+    let emit = defineEmits<{
+  (event: 'like', index: number): void
+  (event: 'unlike', index: number): void
+}>();
+
+    function like(index:number) {
+        emit('like',index);
+    }
+
+    function unlike(index:number) {
+        emit('unlike', index);
+    }
+
 </script>
 
 <style scoped>
 
+    #component {
+        min-width: 800px;
+    }
+
     .card {
-        width:80%;
+        max-width:50%;
         height:450px;
         margin-bottom:25px;
     }
@@ -54,8 +70,23 @@
     }
 
     .likes img {
+        position:absolute;
         width:24px;
         padding-right:10px;
+    }
+
+    .likes .empty:hover {
+        width:26px;
+        /* padding-right:8px; */
+    }
+    
+    .likes small {
+        position:absolute;
+        left:35px;
+    }
+
+    .date:hover, .likes:hover {
+        color:gray;
     }
     
     .card-image, .card-image img {
@@ -74,6 +105,7 @@
 
     .footer {
         padding-bottom:10px;
+        cursor:default;
     }
 
     .footer, .profile_pic {

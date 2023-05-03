@@ -45,8 +45,6 @@
 
 <script setup >
 
-    // let registration_form = new FormData(document.querySelector('#register'));
-
     function register(event) {
         event.preventDefault();
 

@@ -9,7 +9,7 @@
                     <h5 class="h5 card-title">{{ user.firstname }} {{ user.lastname }}</h5>
                     <p>
                         <small>
-                            {{ user.loation }}
+                            {{ user.location }}
                         </small>
                     </p>
                     <p>
