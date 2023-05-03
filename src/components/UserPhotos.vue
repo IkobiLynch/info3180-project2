@@ -1,6 +1,6 @@
 <template>
     <div class="photo col-sm-12 col-md-6 col-lg-4">
-        <img :src="photo.value.url" alt="" @click="view">
+        <img class="container-fluid col-sm-12" :src="photo.url" alt="" @click="view">
     </div>
 </template>
 <script setup lang="ts">
@@ -13,4 +13,9 @@
     }
     
 </script>
-<style scope></style>
+<style scoped>
+    img {
+        width:100%;
+        padding: 2px 2px;
+    }
+</style>

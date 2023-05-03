@@ -81,6 +81,7 @@
   }
 
   .camera-img {
+    width:24px;
     padding-bottom: 10px;
     padding-right: 6px;
   }

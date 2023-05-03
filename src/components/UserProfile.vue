@@ -2,7 +2,7 @@
     <main>
         <div class="container">
             <UserStats v-bind:user="user" />
-            <UserPhotos v-for="photo, index in posts" v-bind:photo="photo" v-bind:key="index" @click="view(index)" />
+            <UserPhotos v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" />
         </div>
     </main>
 </template>
@@ -10,29 +10,15 @@
     import { ref, onMounted } from 'vue'
     import UserStats from '../components/UserStats.vue'
     import UserPhotos from '../components/UserPhotos.vue'
-    let emit = defineEmits(['logout'])
+    let emit = defineEmits(['logout']);
 
-    let posts = ref([]);
+    let photos = ref([]);
     let user = ref({});
     let id:string = localStorage['id'];
     let posts_url:string = `/api/v1/users/${id}/posts`;
     let user_url:string = `/api/v1/users/${id}`;
 
     onMounted(() => {
-        fetch(posts_url,{
-            method:'GET',
-            headers:{
-                'Authorisation':`bearer ${localStorage['token']}`
-            }
-        })
-        .then((result)=>{
-            return result.json();
-        })
-        .then((data)=>{
-            if (data.status_code == 200) {
-                posts = data.data;
-            }
-        });
 
         fetch(user_url,{
             method:'GET',
@@ -55,6 +41,7 @@
                 let posts = data.posts;
                 let followers = data.followers;
                 let biography = data.biography;
+                photos.value = json_obj.photos;
                 user.value = {
                     image_url: image_url,
                     firstname: firstname,
@@ -68,7 +55,7 @@
                 }
             } else {
                 if (json_obj.type) {
-                    emit('logout')
+                    emit('logout');
                 }
             }
         });
@@ -83,4 +70,4 @@
     }
 
 </script>
-<style scope></style>
+<style scoped></style>

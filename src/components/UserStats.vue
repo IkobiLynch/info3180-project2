@@ -51,7 +51,7 @@
         emit('follow');
     }
 </script>
-<style scope>
+<style scoped>
     .card-body, .following {
         display: flex;
         flex-direction: row;

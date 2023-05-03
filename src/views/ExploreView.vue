@@ -1,67 +1,40 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import ThePost from '../components/ThePost.vue'
-
-  // fetch posts
+  import AppPost from '../components/AddPost.vue'
+  import 'bootstrap'
+  
+  let id:Number  = Number(localStorage['id']);
+  
   let posts:any = ref([]);
-  let user_id:string  = localStorage['id'];
+  let url:string = "/api/v1/posts";  
   
-  let image_url = ref("/src/assets/images/home-card-image.jpg");
-  let caption = ref("test caption...");
-  let likes = ref("1");
-  let date= ref("24 April 2018");
-
-  let post = ref({
-    username:"test_user",
-    image_url:image_url,
-    caption:caption,
-    likes:likes,
-    date:date
-  });
-  
-  let url:string = `/api/v1/${user_id}/posts`; 
-
-  function make_post() {
-      if (user_id && user_id != "0") {
-          console.log("make post function called");
-
-          fetch(url, {
-              method: 'POST',
-              headers: {'token':`bearer ${localStorage['token']}`},
-              body: JSON.stringify(post.value)
-          })
-          .then((result)=>{
-              return result.json();
-          })
-          .then((data)=>{
-              if (data.status_code == "200") {
-                  console.log("post added successfully");
-              }
-              console.log("failed to add post");
-          });
-      }
-  }
+  // let addPostModal = bootstrap.Modal.getOrCreateInstance(document.querySelector('#add-post-modal'));
+  let addPostModal = $('#add-post-modal');
 
   onMounted(() => {
-    if (user_id && user_id != "0") {
+    if (id && typeof id == 'number' && localStorage['token']) {
+      // user is logged in on the frontend
         fetch(url, {
             method: 'GET',
             headers: {
                 token: `bearer ${localStorage['token']}`
-          },
-          body: JSON.stringify({id: user_id})
+          }
         })
         .then((result)=>{
             return result.json();
         })
         .then((data) => {
             // if status is 200, assign posts
-            if (data.status_code == 200) {
-              posts.value = data.data;
+            if (data.status == "success") {
+              posts.value = data.posts;
+            } else {
+              posts.value = []
+
             }
         });
     } else {
-      posts.value.push(post);
+      // user isn' logged in 
     }
 
   });
@@ -70,6 +43,19 @@
 
 <template>
   <main>
-    <ThePost v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" />
+    <div class="container">
+      <button v-if="id" value="new_post" class="new_post text-center btn btn-primary float-end sol-sm-3" @click="function(){addPostModal.show()}">New Post</button>
+      <ThePost class="float-start col-sm-9" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" />
+      <AppPost />
+    </div>
   </main>
 </template>
+
+<style scoped>
+  .new_post {
+    position:fixed;
+    right:55px;
+    width:215px;
+  }
+
+</style>

@@ -74,7 +74,7 @@
     }
 </script>
 
-<style scope>
+<style scoped>
     .btn {
         margin-top: 25px;
         width:100%;

@@ -18,9 +18,9 @@ from app.models import Posts, Likes, Follows, Users
 from werkzeug.security import check_password_hash
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
-# from app.forms import
 import jwt
 import psycopg2
+from sqlalchemy import desc
 
 ###
 # Routing for your application.
@@ -167,8 +167,8 @@ def logout():
         return jsonify(errors='An error occurred while processing your request'), 500
 
 
-@app.route('/api/v1/users/<userid>', methods=["GET"])
 # @requires_auth
+@app.route('/api/v1/users/<userid>', methods=["GET"])
 def user_profile(userid):
     userid = eval(userid)
     token = request.headers.get('Authorization')
@@ -194,7 +194,8 @@ def user_profile(userid):
                         "date": user.joined_on.strftime("%d %b %Y"),
                         "image_url": user.profile_photo
                     }
-                    return jsonify(status="success", user=data)
+                    photos = db.session.query(Posts.photo).filter_by(user_id=user_id).all()
+                    return jsonify(status="success", user=data, photos=photos)
             except jwt.ExpiredSignatureError:
                 return jsonify(status="error", type="expired", message="Expired Token")
         else:
@@ -224,8 +225,8 @@ def createPost(user_id):
     else:
         return jsonify(errors = "Invalid request method"), 405
 
+# @login_required
 @app.route("/api/v1/generate-token")
-@login_required
 def generate_token():
     timestamp = datetime.utcnow()
     if current_user is not None:
@@ -246,7 +247,6 @@ def update_exp(id):
     
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['GET'])
-@login_required
 def getUserPost(user_id):
     if request.method=="GET":
             try:
@@ -263,8 +263,9 @@ def getUserPost(user_id):
                 return jsonify(message="Error retrieving posts")
     return jsonify(errors = "Invalid request method"), 405
 
+
 @app.route('/api/users/<user_id>/follow', methods=['POST'])# Currently not functional. Currently working on it to get it working
-@requires_auth
+@login_required
 def follow(user_id):
     if request.method=="POST":
         if g.current_user is not None:
@@ -291,18 +292,18 @@ def follow(user_id):
 
 
 @app.route('/api/v1/posts', methods=['GET'])
-# @login_required
-@requires_auth
 def getPosts():
     if request.method=="GET":
-        allPosts = Posts.query.all()
+        allPosts = db.session.query(Posts).order_by(desc(Posts.id)).all()
         posts= []
         for post in allPosts:
             id=post.id
-            likes= Likes.query.filter_by(post_id = id).count()
-            p={"id":id, "user_id": post.user_id, "photo": post.photo,"caption": post.caption, "created_on":post.created_on,"likes":likes}
+            author = dict(zip(('username','profile_photo'),(db.session.query(Users.username, Users.profile_photo).filter_by(id=post.user_id).first())))
+            liked = db.session.query(Likes).filter_by(user_id=post.user_id).filter_by(post_id=id).first() is not None
+            likes= db.session.query(Likes).filter_by(post_id = id).count()
+            p={"liked":liked, "profile_photo":author['profile_photo'], "username": author['username'], "id":id, "user_id": post.user_id, "photo": post.photo,"caption": post.caption, "created_on":post.created_on.strftime("%d %b %Y"),"likes":likes}
             posts.append(p)
-        return jsonify(posts= posts)
+        return jsonify(status="success", posts = posts), 200
     return jsonify(errors = "Invalid request method"), 405
 
 

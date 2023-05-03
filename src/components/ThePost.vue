@@ -1,29 +1,27 @@
 <template>
     <main>
-        <div class="container col-sm-12 col-md-9">
-            <div class="card post">
-                <div class="header">
-                    <div class="flex-start">
-                        <img src="" alt="">
-                        {{ post.value.username }}
-                    </div>
+        <div class="card col-sm-12 col-md-9">
+            <div class="card-header">
+                <div class="profile_pic flex-start">
+                    <img class="" :src="`../../uploads/${post.profile_photo}`" alt="profile_pic">
+                    {{ post.username }}
                 </div>
-                <div class="card-image">
-                    <img class="" :src="post.value.image_url" alt="post image">
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        {{ post.value.caption }}
-                    </p>
-                </div>
-                <div class="container footer">
-                    <span class="float-start">
-                        <img src="" alt="">{{ post.value.likes }} likes
-                    </span>
-                    <span class="float-end">
-                        {{ post.value.date }}
-                    </span>
-                </div>
+            </div>
+            <div class="card-image">
+                <img class="" :src="`../../uploads/${post.photo}`" alt="post image">
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    {{ post.caption }}
+                </p>
+            </div>
+            <div class="container footer">
+                <span class="likes float-start">
+                    <img src="../../uploads/full_heart.png" alt="like"/><small>{{ post.likes }} likes</small>
+                </span>
+                <span class="float-end">
+                    <small>{{ post.created_on }}</small>
+                </span>
             </div>
         </div>
     </main>
@@ -35,26 +33,52 @@
     let props = defineProps(['post']);
 </script>
 
-<style scope>
+<style scoped>
+
     .card {
-        width: 100%;
+        width:80%;
+        height:450px;
+        margin-bottom:25px;
     }
 
     .card-header {
         height:fit-content;
+        background-color: white;
+        border:none;
     }
 
+    .profile_pic img {
+        width:24px;
+    }
+
+    .likes img {
+        width:24px;
+        padding-right:10px;
+    }
+    
     .card-image, .card-image img {
         width:100%;
-        height:200px;
+        height:250px;
     }
 
     .card-body {
-        height: 6rem;
+        height: 100%;
     }
 
     .card-text {
-        height: 5rem;
+        height: 100%;
+        margin-bottom:50px;
+    }
+
+    .footer {
+        padding-bottom:10px;
+    }
+
+    .footer, .profile_pic {
+        font-size: smaller;
+        color:rgb(102, 102, 102);
+        font-weight:700;
+        font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
     }
 
 </style>

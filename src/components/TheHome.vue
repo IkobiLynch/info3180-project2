@@ -1,22 +1,5 @@
 
 <script setup lang="ts">
-
-  async function get_image(file:string) {
-    const response = await fetch("/api/v1/images/"+file, {
-      method: 'GET',
-      headers: {
-        'Accept':'image/jpeg'
-      }
-    });
-
-    if (response) {
-      const src = 'data:image/jpg;base64,' + response;
-      return src;
-    } 
-
-    return "";
-  }
-  
 </script>
 
 <template>
