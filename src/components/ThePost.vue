@@ -17,7 +17,9 @@
             </div>
             <div class="container footer">
                 <span class="likes float-start">
-                    <img src="../../uploads/full_heart.png" alt="like"/><small>{{ post.likes }} likes</small>
+                    <img v-if="post.liked" src="../components/icons/full_heart.png" alt="like"/>
+                    <img v-else src="../components/icons/empty_heart.png" alt="like"/>
+                    <small>{{ post.likes }} likes</small>
                 </span>
                 <span class="float-end">
                     <small>{{ post.created_on }}</small>
