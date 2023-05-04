@@ -149,9 +149,7 @@
         data-target="#addpostmodal">
         New Post
       </button>
-      <ThePost class="float-start" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" v-on:like="like(index)" @unlike="unlike(index)" />
-
-      <div id="addpostmodal" class="modal fade">
+          <ThePost #default class="float-start" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" v-on:like="like(index)" @unlike="unlike(index)" />   <div id="addpostmodal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

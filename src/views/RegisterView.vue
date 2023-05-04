@@ -1,5 +1,7 @@
 <template>
-    <TheRegister/>
+    <main>
+        <TheRegister #default/>
+    </main>
 </template>
 
 <script setup lang="ts">

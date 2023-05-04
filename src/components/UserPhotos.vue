@@ -1,6 +1,6 @@
 <template>
-    <div class="photo col-sm-12 col-md-6 col-lg-4">
-        <img class="container-fluid col-sm-12" :src="photo.url" alt="" @click="view">
+    <div class="photo">
+        <img class="container-fluid" :src="`../../uploads/${photo}`" :alt="photo" @click="view">
     </div>
 </template>
 <script setup lang="ts">
@@ -14,8 +14,10 @@
     
 </script>
 <style scoped>
-    img {
+    img, .photo {
         width:100%;
-        padding: 2px 2px;
+        height:300px;
+        margin: auto 2px;
     }
+
 </style>

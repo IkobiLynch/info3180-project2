@@ -3,7 +3,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
       <div class="container-fluid">
         <div class="brand">
-          <a class="navbar-brand" href="/"><img class="camera-img" src="./icons/camera-16.png" alt="camera image"> Photogram</a>
+          <a v-if="login" class="navbar-brand" :href="`/users/${id}`"><img class="camera-img" src="./icons/camera-16.png" alt="camera image"> Photogram</a>
+          <a v-else class="navbar-brand" href="/"><img class="camera-img" src="./icons/camera-16.png" alt="camera image"> Photogram</a>
         </div>
         <div class="menu float-end">
           <button
@@ -19,17 +20,17 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="nav navbar-nav me-auto">
-              <li>
-                <RouterLink v-if="!id" v-bind:id='id' class="text-white" to="/">Home</RouterLink>
+              <li v-if="!login">
+                <RouterLink v-bind:id='id' class="text-white" to="/">Home</RouterLink>
               </li>
-              <li>
+              <li v-if="login">
                 <RouterLink class="text-white" to="/explore">Explore</RouterLink>
               </li>
               <li v-if="login" >
-                <RouterLink class="text-white" v-bind:id='id' :to="`/users/${id}`">My Profile</RouterLink>
+                <RouterLink class="text-white" :to="`/users/${id}`">My Profile</RouterLink>
               </li>
               <li v-if="login" >
-                <a class="text-white" href="" @click="logout">Logout</a>
+                <a class="text-white" @click="logout">Logout</a>
               </li>
             </ul>
           </div>
@@ -47,20 +48,12 @@
   function logout() {
     const url: string = "/api/v1/auth/logout"; 
     fetch(url, {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            // 'Accept': 'application/json',
-            // 'Content-Type': 'application/json',
-            'Authentication': `bearer ${localStorage['token']}`
+            'Authorization': `bearer ${localStorage['token']}`
         }
     })
-    .then((result)=>{
-        const res = result.json();
-        return res;
-    })
     .then((data)=>{
-        // do something with the data
-
         // update the token and id in localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('id');

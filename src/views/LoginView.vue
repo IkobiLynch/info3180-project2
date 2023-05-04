@@ -1,8 +1,6 @@
 <template>
     <main>
-        <Suspense>
-            <TheLogin/>
-        </Suspense>
+        <TheLogin/>
     </main>
 </template>
 

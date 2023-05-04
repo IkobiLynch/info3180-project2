@@ -154,16 +154,15 @@ def login():
 @app.route('/api/v1/auth/logout', methods = ['POST','GET'])
 # @login_required
 def logout():
+    token = request.headers.get('Authorization', None).split(" ")
     try:
-        token = request.headers.get('Authorization').split(" ")
-        if len(token) == 2:
-            if token[0].lower() == "bearer":
-                payload = jwt.decode(token[1])
-                user_id = ACTIVE.get(payload.get('sub'), None)
-                if user_id is not None:
-                    ACTIVE.pop(user_id)
-        logout_user()
-        return jsonify(message = "User sucessfully logged out.")
+        if user_authorized() and len(token) == 2 and token[0].lower() == "bearer":
+            payload = jwt.decode(token[1], app.config['SECRET_KEY'], algorithms=['HS256'])
+            user = ACTIVE.get(payload.get('sub'), None)
+            if user is not None:
+                ACTIVE.pop(user.id)
+            logout_user()
+        return jsonify(status="success", message = "User sucessfully logged out."), 200
     except Exception as e:
         print(e)
         return jsonify(errors='An error occurred while processing your request'), 500
@@ -177,7 +176,7 @@ def user_profile(userid):
     token = request.headers.get('Authorization')
     parts = token.split()
     if len(parts) == 2:
-        if parts[0].lower() == "bearer":
+        if parts[0].lower() == "bearer" and parts[1]!="undefined":
             try:
                 # check if the requester is logged in
                 payload = jwt.decode(parts[1], app.config['SECRET_KEY'], algorithms=["HS256"])
@@ -206,15 +205,23 @@ def user_profile(userid):
                         "followed": followed
                     }
                     posts = []
-                    photos = db.session.query(Posts.photo).filter_by(user_id=userid).all()
-                    for image in photos:
-                        posts.append(image[0])
-                    return jsonify(status="success", user=data, photos=posts)
+                    posts_images = []
+                    photos = db.session.query(Posts).filter_by(user_id=userid).all()
+                    for post in photos:
+                                                
+                        author = dict(zip(('username','profile_photo'),(db.session.query(Users.username, Users.profile_photo).filter_by(id=post.user_id).first())))
+                        liked = db.session.query(Likes).filter_by(user_id=post.user_id).filter_by(post_id=post.id).first() is not None
+                        likes= db.session.query(Likes).filter_by(post_id = post.id).count()
+                        p={"liked":liked, "profile_photo":author['profile_photo'], "username": author['username'], "id":post.id, "user_id": post.user_id, "photo": post.photo,"caption": post.caption, "created_on":post.created_on.strftime("%d %b %Y"),"likes":likes}
+                        posts.append(p)
+                        
+                        posts_images.append(post.photo)
+                    return jsonify(status="success", user=data, photos=posts_images, posts=posts)
             except jwt.ExpiredSignatureError:
                 return jsonify(status="error", type="expired", message="Expired Token")
         else:
             return jsonify(status="error", type="invalid_token", message="Invalid Token type")
-    return jsonify(status="error", type="invalid_authorization", message="Unable to fulfill request")
+    return jsonify(status="error", type="invalid_authorization", message="Unable to authorize user")
 
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['POST'])

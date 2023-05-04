@@ -3,14 +3,16 @@
   import UserProfile from '../components/UserProfile.vue'
   let id = localStorage['id'];
   if(id) {
-    window.location.replace(`users/${id}`);
-  }
+    window.location.replace('/explore');
+  } 
+  
 </script>
 
 <template>
   <main>
     <Suspense>
-      <TheHome v-if="!id" :id="id" />
+      <TheHome #default v-if="!id" :id="id" />
+      <template #fallback>Loading...</template>
     </Suspense>
   </main>
 </template>

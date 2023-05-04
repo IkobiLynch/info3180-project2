@@ -1,9 +1,27 @@
 <template>
-    <UserStats @follow="follow" @unfollow="unfollow" v-bind:user="user" />
-    <UserPhotos v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" />
+    <div class="container">
+        <div class="stats">
+            <UserStats @follow="follow" @unfollow="unfollow" v-bind:user="user" />
+        </div>
+        <div class="photos">
+            <UserPhotos class="pic" v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" data-toggle="modal" data-target="#viewpostmodal" />
+        </div>
+    </div>
+
+    <div id="viewpostmodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="preview" aria-hidden="true">
+        <div class="modal-dialog .modal-dialog-centered">
+            <div class="modal-content card">
+                <div class="modal-body ">
+                    <img class="preview card-image" :src="`../../uploads/${post['photo']}`" alt="image"/>
+                </div>
+                <div class="label" id="label" hidden>preview image</div>
+            </div>
+        </div>
+    </div>
+
 </template>
 <script setup lang="ts">
-    import { ref, onMounted } from 'vue'
+    import { ref, onMounted, onBeforeMount } from 'vue'
     import UserStats from '../components/UserStats.vue'
     import UserPhotos from '../components/UserPhotos.vue'
     let emit = defineEmits(['logout']);
@@ -13,9 +31,11 @@
     let id:string = localStorage['id'];
     let userid:Number = Number(location.pathname.split("/")[2]);
     let me:boolean = userid == Number(id);
+    var post = ref({});
+    let posts:any = [];
 
     
-    onMounted(() => {
+    onBeforeMount(() => {
         let user_url:string = `/api/v1/users/${userid}`;
 
         fetch(user_url,{
@@ -35,24 +55,25 @@
                 let lastname = data.lastname;
                 let location = data.location;
                 let date = data.date;
-                let posts = data.posts;
+                let postsdata = data.posts;
                 let followers = data.followers;
                 let biography = data.biography;
                 let followed = data.followed;
                 photos.value = json_obj.photos;
                 user.value = {
                     image_url: image_url,
-                    firstname: firstname,
-                    lastname: lastname,
-                    location: location,
+                    firstname: firstname[0].toUpperCase() + firstname.substring(1).toLowerCase(),
+                    lastname: lastname[0].toUpperCase() + lastname.substring(1).toLowerCase(),
+                    location: location.toUpperCase(),
                     date: date,
-                    posts: posts,
+                    posts: postsdata,
                     followers: followers,
                     biography: biography,
                     userid:userid,
                     followed:followed,
                     me:me
                 }
+                posts = json_obj.posts;
             } else {
                 if (json_obj.type) {
                     emit('logout');
@@ -61,7 +82,8 @@
         });
     });
 
-    function view(index) {
+    function view(index: string|number):void {
+        post.value = posts[Number(index)];
         console.log(index);
     }
 
@@ -76,7 +98,8 @@
             .then(result => result.json())
             .then((data) => {
                 if (data.status == "success") {
-                    window.location.reload();
+                    user.value['followed']=true;
+                    user.value['followers']+=1;
                 }
             })
 
@@ -94,7 +117,8 @@
             .then(result => result.json())
             .then((data) => {
                 if (data.status == "success") {
-                    window.location.reload();
+                    user.value['followed']=false;
+                    user.value['followers']-=1;
                 }
             })
 
@@ -102,3 +126,63 @@
     }
 
 </script>
+
+<style scoped>
+
+    .photos {
+        padding-left:25px;
+    }
+
+    @media (min-width:410px) and (max-width:550px) {
+        .photos {
+            margin-top:35px;
+            width:100%;
+            height:fit-content;
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (min-width:550px) {
+        .photos {
+            margin-top:35px;
+            width:100%;
+            height:fit-content;
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+
+    .container {
+        width:100%;
+        height:fit-content;
+        display:flex;
+        flex-direction:column;
+    }
+
+    #viewpostmodal {
+        justify-content: center;
+        align-items:center;
+        vertical-align: middle;
+    }
+
+    .modal-body {
+        height:100%;
+        padding:0;
+        margin:0;
+    }
+
+    #viewpostmodal .preview {
+        width:100%;
+    }
+
+    .stats {
+        width:100vw;
+    }
+
+    .pic {
+        width:100%;
+        height:300px;
+    }
+
+</style>

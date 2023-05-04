@@ -1,5 +1,5 @@
 <template>
-    <main> <div class="container col-sm-8 col-lg-5">
+    <div class="container col-sm-8 col-lg-5">
         <div v-if="displayAlerts" :class="[(status=='success' || status=='error')? (( status!=='success' ) ? alertDanger : alertSuccess) : 'alert']">
             <ul v-if="status=='error'">
                 <li v-for="(error, indx) in errors" v-bind:errors="errors" v-bind:key="indx">
@@ -8,18 +8,18 @@
             </ul>
             <span v-else>{{ message }}</span>
         </div>
-        <LoginForm :id="id" v-if="!id" @success='success' @fail="fail"/>
-    </div> </main>
+        <LoginForm @success='success' @fail="fail"/>
+    </div>
 </template>
 
 <script setup lang="ts">
     import LoginForm from './LoginForm.vue';
     import { ref } from 'vue';
 
-    let id:string = localStorage['id'];
+    // let id:string = localStorage['id'] ;
 
     if (localStorage['id']) {
-        window.location.replace(`/users/${id}`)
+        success();
     } 
 
     let displayAlerts = ref(false);
@@ -33,6 +33,7 @@
         status.value = "error";
         errors.value = e;
         message.value = m;
+        // location.reload();
     }
 
     function success() {

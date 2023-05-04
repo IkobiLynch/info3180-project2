@@ -85,7 +85,7 @@
                     success();
                     clear();
                     console.log("login successful");
-                    success();
+                    emits('success');
                 }
             });
         }
