@@ -40,9 +40,7 @@ class Follows(db.Model):
     __tablename__ = "follows"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # follower = db.relationship('Users', backref=db.backref('follows', lazy=True))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # user = db.relationship('Users', backref=db.backref('likes', lazy=True))
 
     def __init__(self, follower_id, user_id):
         self.follower_id = follower_id
