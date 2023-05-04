@@ -1,17 +1,18 @@
 <script setup >
   import { ref, onMounted } from 'vue'
   import ThePost from '../components/ThePost.vue'
-  // import AppPost from '../components/AddPost.vue'
   
   let id  = Number(localStorage['id']);
   
   let posts = ref([]);
   let url = "/api/v1/posts";  
-
+  
   let photo = ref("");
+  let caption = ref("");
+  let preview = ref(false);
   let posturl = `/api/v1/users/${id}/posts`;
   
-  let addPostModal = $('#add-post-modal');
+  let addPostModal = $('#addpostmodal');
 
   onMounted(() => {
     if (id && typeof id == 'number' && localStorage['token']) {
@@ -40,21 +41,19 @@
 
   });
 
+
   function loadPreview() {
-      photo.value = "";
+    photo.value = URL.createObjectURL(document.querySelector('#photo').files[0]);
+    preview.value=true;
   }
 
-  function openModal() {
-    addPostModal.show();
-    // addPostModal.modal('show');
-  }
 
-  async function addPost() {
+  function addPost() {
     if (id && typeof id == 'number') {
       console.log("make post function called");
-      let form = new FormData($('form#add-post-form')[0]);
+      let form = new FormData($('form#addPostForm')[0]);
 
-      await fetch(posturl, {
+      fetch(posturl, {
           method: 'POST',
           headers: {'token':`bearer ${localStorage['token']}`},
           body: form
@@ -65,13 +64,14 @@
       .then((data)=>{
           if (data.status == "success") {
             console.log("post added successfully");
-            $('form').hide();
+            location.reload();
           } else {
               console.log("failed to add post");
           }
       });
     }
   }
+
 
   function like(index) {
     if (id) {
@@ -128,37 +128,64 @@
     }
   }
 
+  function clear() {
+    photo.value = "";
+    preview.value = false;
+    caption.value = "";
+  }
+
 </script>
 
 <template>
   <main>
     <div class="container">
-      <button v-if="id" value="new_post" class="new_post text-center btn btn-primary float-end col-sm-3" @click="openModal">New Post</button>
-      <ThePost class="float-start col-sm-9" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" v-on:like="like(index)" @unlike="unlike(index)" />
+      <button 
+        v-if="id" 
+        @click="clear"
+        type="button" 
+        value="New Post" 
+        class="new_post text-center btn btn-primary float-end" 
+        data-toggle="modal" 
+        data-target="#addpostmodal">
+        New Post
+      </button>
+      <ThePost class="float-start" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" v-on:like="like(index)" @unlike="unlike(index)" />
 
-      <div id="add-post-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+      <div id="addpostmodal" class="modal fade">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalLabel"> Create Post</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @click="clear" >x</button>
                 </div>
                 <div class="modal-body">
+                  <div v-if="preview" class="preview">
                     <img id="preview-image" :src="`${photo}`" alt="image preview"/>
-                    <form id="add-post-form" action="" method="post" enctype="multipart/form-data">
+                  </div>
+                    <form id="addPostForm" action="" method="post" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="photo">Image</label>
-                            <input @change="loadPreview" type="file" name="photo" id="photo" class="form-control" />
+                            <input @change="loadPreview" accept="image/*" type="file" name="photo" id="photo" class="form-control" />
                         </div>
                         <div class="form-group">
                             <label for="caption">Caption</label>
-                            <textarea value="" name="caption" id="caption" cols="30" rows="5" class="form-control"></textarea>
+                            <textarea v-model="caption" name="caption" id="caption" cols="30" rows="2" class="form-control"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" v-on:click="addPost" class="btn btn-primary"><img src="../components/icons/save.png" alt="save" />  Add Movie</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" 
+                      v-on:click="addPost" 
+                      class="btn btn-primary">
+                        <img id="save" src="../components/icons/save.png" alt="save" class="text-white" />  
+                        Save
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn btn-secondary"
+                      @click="clear" 
+                      data-dismiss="modal">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
@@ -168,11 +195,55 @@
 </template>
 
 <style scoped>
+
+  .preview {
+    width: fit-content;
+    /* height: 200px; */
+    justify-content: center;
+    margin:auto auto 15px auto;
+  }
+
+  #preview-image {
+    width:100%;
+    max-height:250px;
+  }
+
+  input[type="file"] {
+    width: 110px;
+    border: none;
+    background-color: none;
+  }
+  .btn-close {
+    border-width: 0;
+    border-color: rgb(182, 98, 98);
+    border-radius: 5px;
+    background-color: rgb(182, 98, 98);
+    color: rgb(64, 64, 64);
+    font-weight: 600;
+    font-family: monospace;
+    margin-top:2px;
+    margin-right:2px
+  }
+
+  .btn-close:hover {
+    font-weight:800;
+    border-color: brown;
+    background-color: red;
+    color:white;
+    box-shadow: 1px 1px 3px black;
+  }
+
+  #save {
+    width: 16px;
+    margin-right:6px;
+    margin-bottom:4px;
+  }
+
   .new_post {
-    position:fixed;
-    left:600px;
-    right:55px;
-    width:285px;
+    position:relative;
+    float:right;
+    margin-right:20px;
+    width:250px;
   }
 
   @media (max-width:900px) {
@@ -184,7 +255,7 @@
       left: auto;
       right:auto;
       float:none;
-      margin-left:10px;
+      margin-left:15px;
     }
   }
 

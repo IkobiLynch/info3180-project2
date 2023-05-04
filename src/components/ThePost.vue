@@ -16,12 +16,12 @@
                 </p>
             </div>
             <div class="container footer">
-                <span class="likes float-start">
+                <span class="likes float-left">
                     <img v-if="post.liked" class="full" src="../components/icons/full_heart.png" alt="like post" @click="unlike(post.id)" />
                     <img v-else class="empty" src="../components/icons/empty_heart.png" alt="unliked post" @click="like(post.id)" />
                     <small>{{ post.likes }} likes</small>
                 </span>
-                <span class="date float-end">
+                <span class="date float-right">
                     <small>{{ post.created_on }}</small>
                 </span>
             </div>
@@ -54,8 +54,9 @@
     }
 
     .card {
-        max-width:50%;
+        max-width:400px;
         height:450px;
+        
         margin-bottom:25px;
     }
 
@@ -106,6 +107,10 @@
     .footer {
         padding-bottom:10px;
         cursor:default;
+    }
+
+    .footer small {
+        margin-left: 15px;
     }
 
     .footer, .profile_pic {
