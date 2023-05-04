@@ -78,7 +78,22 @@
       let post_id = posts.value[index].id;
       let like_url = `/api/v1/like/${post_id}`;
 
-      $.post(like_url);
+      fetch(like_url, {
+        method:"POST",
+        headers:{"Authorization": `bearer ${localStorage['token']}`}
+      })
+      .then(result => result.json())
+      .then((data) => {
+        if (data.status !== "success") {
+          window.location.assign("/login");
+        } else {
+          // update local posts using index
+          posts.value[Number(index)]['liked'] = true;
+          posts.value[Number(index)]['likes'] += 1;
+          console.log("post liked");
+        }
+
+      });
     } else {
       window.location.assign("/login");
     }
@@ -102,6 +117,10 @@
         if (data.status=="success") {
           // reduce likes count for post
           posts.value[index]['likes'] -= 1;
+          posts.value[index]['liked'] = false;
+          console.log("post unliked");
+        } else {
+          window.location.assign("/login");
         }
       });
     } else {

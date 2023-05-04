@@ -133,10 +133,12 @@ def login():
             username = data.username.data
             password = data.password.data
             timestamp= datetime.utcnow()
+            expiry_date= timestamp+timedelta(days=7)
             user = Users.query.filter_by(username=username).first()
             print(user)
             if user is not None and check_password_hash(user.password, password):
-                payload = {'sub': user.id, "iat":timestamp, "exp": timestamp+timedelta(days=7)}
+                payload = {'sub': user.id, "iat":timestamp, "exp": expiry_date}
+                
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm = 'HS256')
                 if login_user(user):
                     load_user(user.id)
@@ -245,7 +247,7 @@ def generate_token():
             "exp": timestamp + timedelta(days=7)
         }
 
-    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm="HS256")
 
     return jsonify(token=token)
 
@@ -317,31 +319,55 @@ def getPosts():
 
 
 @app.route('/api/v1/like/<post_id>', methods=['POST']) # Currently not functional. Currently working on it to get it working
-@login_required
+# @login_required
 def like_post(post_id):
-    if request.method=="POST":
-        like = Likes(post_id=post_id, user_id=current_user.id)
-        db.session.add(like)
-        db.session.commit()
-        return jsonify(status="success", message="Post liked!"), 200
+    if request.method=="POST" and user_authorized():
+        if current_user.is_authenticated:
+            like = Likes(post_id=post_id, user_id=current_user.id)
+            db.session.add(like)
+            db.session.commit()
+            return jsonify(status="success", message="Post liked!"), 200
+        else:
+            return jsonify(status="error", errors = "User not Logged in!"), 405
     return jsonify(errors = "Invalid request method"), 405
             
 
 @app.route('/api/v1/unlike/<post_id>', methods=['POST']) # Currently not functional. Currently working on it to get it working
-@login_required
+# @login_required
 def unlike_post(post_id):
-    if request.method=="POST":
-        # find like and delete it
-        like = db.session.query(Likes).filter_by(post_id=post_id, user_id=current_user.id)
-        db.session.delete(like)
-        db.session.commit()
-        return jsonify(status="success", message="Post unliked!"), 200
+    if request.method=="POST" and user_authorized():
+        if current_user.is_authenticated:
+            # find like and delete it
+            # like = Likes(post_id=post_id, user_id=current_user.id)
+            tbd = db.session.query(Likes).filter_by(user_id=current_user.id).filter_by(post_id=post_id).first()
+            db.session.delete(tbd)
+            db.session.commit()
+            return jsonify(status="success", message="Post unliked!"), 200
+        else:
+            return jsonify(status="error", errors = "User not Logged in!"), 405
     return jsonify(errors = "Invalid request method"), 405
 
 
 ###
 # The functions below should be applicable to all Flask apps.
 ###
+
+def user_authorized():
+    token = request.headers.get('Authorization', None)
+    parts = []
+    if token is not None: parts = token.split()
+    if len(parts)==2 and parts[0].lower()=="bearer":
+        payload = jwt.decode(parts[1], app.config['SECRET_KEY'], algorithms=["HS256"])
+        user_id = payload['sub']
+        if not current_user.is_authenticated and ACTIVE.get('user_id', None) is None:
+            user = Users.query.filter_by(id=user_id).first()
+            if login_user(user):
+                load_user(user_id)
+                return True
+            return False
+        return True
+    else:
+        return False
 
 # Here we define a function to collect form errors from Flask-WTF
 # which we can later use
