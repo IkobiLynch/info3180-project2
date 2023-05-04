@@ -18,6 +18,7 @@
         width:100%;
         height:300px;
         margin: auto 2px;
+        padding-bottom:15px;
     }
 
 </style>
