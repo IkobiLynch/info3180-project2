@@ -152,7 +152,7 @@ def login():
 
 
 @app.route('/api/v1/auth/logout', methods = ['POST','GET'])
-@login_required
+# @login_required
 def logout():
     try:
         token = request.headers.get('Authorization').split(" ")
@@ -171,7 +171,6 @@ def logout():
 
 # @requires_auth
 @app.route('/api/v1/users/<userid>', methods=["GET"])
-# @requires_auth
 # @login_required
 def user_profile(userid):
     userid = eval(userid)
