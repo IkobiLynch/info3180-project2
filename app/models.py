@@ -10,7 +10,7 @@ class Posts(db.Model):
     caption = db.Column(db.String(200))
     photo = db.Column(db.String(200))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_on = db.Column(db.DateTime, default = datetime.now)
+    created_on = db.Column(db.DateTime, default = datetime.now())
 
     def __init__(self, caption, photo, user_id):
         self.caption = caption

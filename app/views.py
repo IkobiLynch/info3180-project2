@@ -210,7 +210,6 @@ def user_profile(userid):
 
 
 @app.route('/api/v1/users/<user_id>/posts', methods=['POST'])
-@login_required
 def create_post(user_id):
     form = PostForm()
     
@@ -220,14 +219,16 @@ def create_post(user_id):
             caption= form.caption.data.strip()
             
             file_in = secure_filename(photo.filename)
-            name, ext = file_in.split(".") 
+            parts = file_in.split(".")
+            name = parts[0]
+            ext = parts[len(parts)-1]
             filename = name + "_" + datetime.strftime(datetime.now(),"%Y-%m-%dT%H-%M-%S") + f".{ext}"
 
-            post= Posts(caption=caption, photo = filename, user_id= user_id) #  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
+            post = Posts(caption=caption, photo = filename, user_id= user_id) #  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
             db.session.add(post)
             db.session.commit()
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) #  When these green parts are commented out the function works in postman. #need to check if this will work when actual file is uploaded
-            return jsonify(message="Successfully created a new post"), 201
+            return jsonify(status="success", message="Successfully created a new post"), 200
         except Exception as e:
                 db.session.rollback()
                 print(e)
@@ -275,7 +276,7 @@ def getUserPost(user_id):
 
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])# Currently not functional. Currently working on it to get it working
-@login_required
+# @login_required
 def follow(user_id):
     if request.method=="POST":
         if g.current_user is not None:
