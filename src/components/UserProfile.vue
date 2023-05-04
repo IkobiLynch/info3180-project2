@@ -1,5 +1,5 @@
 <template>
-    <UserStats v-bind:user="user" />
+    <UserStats @follow="follow" @unfollow="unfollow" v-bind:user="user" />
     <UserPhotos v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" />
 </template>
 <script setup lang="ts">
@@ -11,10 +11,12 @@
     let photos = ref([]);
     let user = ref({});
     let id:string = localStorage['id'];
+    let userid:Number = Number(location.pathname.split("/")[2]);
+    let me:boolean = userid == Number(id);
 
     
     onMounted(() => {
-        let user_url:string = `/api/v1/users/${id}`;
+        let user_url:string = `/api/v1/users/${userid}`;
 
         fetch(user_url,{
             method:'GET',
@@ -36,6 +38,7 @@
                 let posts = data.posts;
                 let followers = data.followers;
                 let biography = data.biography;
+                let followed = data.followed;
                 photos.value = json_obj.photos;
                 user.value = {
                     image_url: image_url,
@@ -45,7 +48,10 @@
                     date: date,
                     posts: posts,
                     followers: followers,
-                    biography: biography
+                    biography: biography,
+                    userid:userid,
+                    followed:followed,
+                    me:me
                 }
             } else {
                 if (json_obj.type) {
@@ -60,7 +66,39 @@
     }
 
     function follow() {
-        console.log("follow")
+        if (!me){
+            fetch(`/api/v1/follow/${userid}`, {
+                method:"POST",
+                headers: {
+                    "Authorization": `bearer ${localStorage['token']}`
+                }
+            })
+            .then(result => result.json())
+            .then((data) => {
+                if (data.status == "success") {
+                    window.location.reload();
+                }
+            })
+
+        }
+    }
+
+    function unfollow() {
+        if (!me){
+            fetch(`/api/v1/unfollow/${userid}`, {
+                method:"POST",
+                headers: {
+                    "Authorization": `bearer ${localStorage['token']}`
+                }
+            })
+            .then(result => result.json())
+            .then((data) => {
+                if (data.status == "success") {
+                    window.location.reload();
+                }
+            })
+
+        }
     }
 
 </script>

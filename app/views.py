@@ -179,26 +179,34 @@ def user_profile(userid):
     if len(parts) == 2:
         if parts[0].lower() == "bearer":
             try:
+                # check if the requester is logged in
                 payload = jwt.decode(parts[1], app.config['SECRET_KEY'], algorithms=["HS256"])
-                user = ACTIVE.get(userid, None)
                 user_id = payload.get('sub')
-                if user is not None and userid == user_id:
-                    followers = db.session.query(Follows).filter_by(user_id=user_id).count()
-                    posts = db.session.query(Posts).filter_by(user_id=user_id).count()
+                user = ACTIVE.get(user_id, None)
+                if user is not None:
+                    # get the followers count for the queried userid
+                    followers = db.session.query(Follows).filter_by(user_id=userid).count()
+                    # get the posts count for the queried userid
+                    posts = db.session.query(Posts).filter_by(user_id=userid).count()
+                    # get the details for the queried user
+                    q_user = db.session.query(Users).filter_by(id=userid).first()
+                    followed = db.session.query(Follows).filter_by(follower_id=user_id).filter_by(user_id=userid).first() is not None
                     data = {
-                        "firstname":user.firstname,
-                        "lastname":user.lastname,
-                        "email":user.email,
-                        "location":user.location,
-                        "biography":user.biography,
-                        "username":user.username,
+                        "userid":userid,
+                        "firstname":q_user.firstname,
+                        "lastname":q_user.lastname,
+                        "email":q_user.email,
+                        "location":q_user.location,
+                        "biography":q_user.biography,
+                        "username":q_user.username,
                         "posts": posts,
                         "followers": followers,
-                        "date": user.joined_on.strftime("%d %b %Y"),
-                        "image_url": user.profile_photo
+                        "date": q_user.joined_on.strftime("%d %b %Y"),
+                        "image_url": q_user.profile_photo,
+                        "followed": followed
                     }
                     posts = []
-                    photos = db.session.query(Posts.photo).filter_by(user_id=user_id).all()
+                    photos = db.session.query(Posts.photo).filter_by(user_id=userid).all()
                     for image in photos:
                         posts.append(image[0])
                     return jsonify(status="success", user=data, photos=posts)
@@ -275,31 +283,56 @@ def getUserPost(user_id):
     return jsonify(errors = "Invalid request method"), 405
 
 
-@app.route('/api/users/<user_id>/follow', methods=['POST'])# Currently not functional. Currently working on it to get it working
+@app.route('/api/v1/follow/<user_id>', methods=['POST'])# Currently not functional. Currently working on it to get it working
 # @login_required
 def follow(user_id):
-    if request.method=="POST":
-        if g.current_user is not None:
-            print(g.current_user)
-            if g.current_user.id!= user_id:
-                try:
-                    follower= g.current_user
-                    followee = Users.query.filter_by(id=user_id).first()
-                    if followee:
-                        follow = Follows(follower_id=follower, user_id = user_id)
-                        db.session.add(follow)
-                        db.session.commit()
-                        return jsonify(message="You are now following that user."), 201
+    if request.method=="POST" and user_authorized():
+        print(current_user)
+        if current_user.id!= user_id:
+            try:
+                followed = db.session.query(Follows).filter_by(follower_id=current_user.id).filter_by(user_id=user_id).first() is not None
+                if not followed:
+                    follow = Follows(follower_id=current_user.id, user_id = user_id)
+                    db.session.add(follow)
+                    db.session.commit()
+                    if (db.session.query(Users).filter_by(id=user_id).first() is not None):
+                        return jsonify(status="success", message="You are now following that user."), 201
                     else:
-                        return jsonify(message="User not found."), 404
-                except Exception as e:
-                    db.session.rollback()
-                    print(e)
-                    return jsonify(errors = f"Internal Error: {e}")
-            else:
-                return jsonify(errors = f"You can't follow yourself.")
+                        return jsonify(statues="error", message="User not found."), 404
+                else:
+                    return jsonify(status="success", message="You already followed this user"), 201
+            except Exception as e:
+                db.session.rollback()
+                print(e)
+                return jsonify(statues="error", errors = f"Internal Error: {e}")
+        else:
+            return jsonify(statues="error", errors = "You can't follow yourself.")
     else:
-         return jsonify(errors = "Invalid request method"), 405
+         return jsonify(statues="error", errors = "Invalid request method"), 405
+     
+     
+@app.route('/api/v1/unfollow/<user_id>', methods=['POST'])# Currently not functional. Currently working on it to get it working
+# @login_required
+def unfollow(user_id):
+    if request.method=="POST" and user_authorized():
+        print(current_user)
+        if current_user.id!= user_id:
+            try:
+                followed = db.session.query(Follows).filter_by(follower_id=current_user.id).filter_by(user_id=user_id).first()
+                if followed is not None:
+                    db.session.delete(followed)
+                    db.session.commit()
+                    return jsonify(status="success", message="You are no longer following that user."), 201
+                else:
+                    return jsonify(status="success", message="You are not following that user"), 201
+            except Exception as e:
+                db.session.rollback()
+                print(e)
+                return jsonify(statues="error", errors = f"Internal Error: {e}")
+        else:
+            return jsonify(statues="error", errors = "You can't unfollow yourself.")
+    else:
+         return jsonify(statues="error", errors = "Invalid request method"), 405
 
 
 @app.route('/api/v1/posts', methods=['GET'])

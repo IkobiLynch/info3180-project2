@@ -36,7 +36,7 @@
     }
 
     function success() {
-        location.replace(`/users/${localStorage['id']}`)
+        location.assign("/explore");
     }
 </script>
 

@@ -4,7 +4,8 @@
             <div class="card-header">
                 <div class="profile_pic flex-start">
                     <img class="" :src="`../../uploads/${post.profile_photo}`" alt="profile_pic">
-                    {{ post.username }}
+                    
+                    <a :href="`/users/${post.user_id}`">{{ post.username }}</a>
                 </div>
             </div>
             <div class="card-image">
@@ -31,11 +32,12 @@
 </template>
 
 <script setup lang="ts">
+
     let props = defineProps(['post']);
     let emit = defineEmits<{
-  (event: 'like', index: number): void
-  (event: 'unlike', index: number): void
-}>();
+        (event: 'like', index: number): void
+        (event: 'unlike', index: number): void
+    }>();
 
     function like(index:number) {
         emit('like',index);
@@ -67,7 +69,9 @@
     }
 
     .profile_pic img {
-        width:24px;
+        width:28px;
+        margin-right:8px;
+        border-radius:50%;
     }
 
     .likes img {

@@ -85,7 +85,7 @@
                     success();
                     clear();
                     console.log("login successful");
-                    window.location.replace(`/users/${id}`);
+                    success();
                 }
             });
         }
