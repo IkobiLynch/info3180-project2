@@ -96,10 +96,6 @@
     margin: 0 10px;
   }
 
-  .menu {
-    margin-right:35px;
-  }
-
   a:hover {
     font-weight: bold;
   }

@@ -1,11 +1,9 @@
 <template>
-    <div class="container">
-        <div class="stats">
-            <UserStats @follow="follow" @unfollow="unfollow" v-bind:user="user" />
-        </div>
-        <div class="photos">
-            <UserPhotos class="pic" v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" data-toggle="modal" data-target="#viewpostmodal" />
-        </div>
+    <div class="stats">
+        <UserStats @follow="follow" @unfollow="unfollow" v-bind:user="user" />
+    </div>
+    <div class="photos">
+        <UserPhotos class="pic" v-for="photo, index in photos" v-bind:photo="photo" v-bind:key="index" @click="view(index)" data-toggle="modal" data-target="#viewpostmodal" />
     </div>
 
     <div id="viewpostmodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="preview" aria-hidden="true">
@@ -130,14 +128,13 @@
 <style scoped>
 
     .photos {
-        padding-left:25px;
+        margin-top:35px;
+        height:300px;
     }
 
     @media (min-width:410px) and (max-width:550px) {
         .photos {
-            margin-top:35px;
             width:100%;
-            height:fit-content;
             display:grid;
             grid-template-columns: 1fr 1fr;
         }
@@ -145,9 +142,8 @@
 
     @media (min-width:550px) {
         .photos {
-            margin-top:35px;
             width:100%;
-            height:fit-content;
+            height:300px;
             display:grid;
             grid-template-columns: 1fr 1fr 1fr;
         }
@@ -158,6 +154,7 @@
         height:fit-content;
         display:flex;
         flex-direction:column;
+        margin-left:0;
     }
 
     #viewpostmodal {

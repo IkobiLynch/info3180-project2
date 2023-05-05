@@ -76,7 +76,7 @@
     }
     
     .card {
-        width:97%;
+        width:100%;
         height: fit-content;
         box-shadow: 2px 2px 2px gray;
     }
@@ -85,9 +85,7 @@
         
         .details {
             position:relative;
-            /* left:15px; */
             width:100%;
-            margin-top: 25px;
         }
 
         .follow, .details {
@@ -115,7 +113,6 @@
             position:relative;
             left:15px;
             width:45%;
-            margin-top: 25px;
         }
 
         .follow, .details {
@@ -169,7 +166,6 @@
             position:relative;
             left:15px;
             width:45%;
-            margin-top: 25px;
         }
 
         .follow, .details {
@@ -222,7 +218,6 @@
             position:relative;
             left:15px;
             width:45%;
-            margin-top: 25px;
         }
 
         .follow, .details {
@@ -297,6 +292,10 @@
             margin:0;
         }
 
+    }
+
+    .details {
+        margin-top: 25px;
     }
 
 
