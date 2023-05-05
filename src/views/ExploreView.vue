@@ -167,7 +167,7 @@
                         </div>
                         <div class="form-group">
                             <label for="caption">Caption</label>
-                            <textarea v-model="caption" name="caption" id="caption" cols="30" rows="2" class="form-control"></textarea>
+                            <textarea v-model="caption" name="caption" id="caption" cols="30" rows="2" class="form-control" maxlength="75"></textarea>
                         </div>
                     </form>
                 </div>
