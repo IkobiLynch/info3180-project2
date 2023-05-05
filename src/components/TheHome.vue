@@ -4,14 +4,14 @@
 
 <template>
   
-  <div class="container col-sm-10 col-lg-12">
-    <div id="home-photo" class="card home-card no-gutters float-left">
+  <div class="container">
+    <div id="home-photo" class="card home-card no-gutters">
       <div class="card-image">
         <img id="home-card-photo" src="@/assets/images/home-card-image.jpg" alt="home page photo"/>
       </div>
     </div>
 
-    <div id="home-actions" class="card home-card float-right">
+    <div id="home-actions" class="card home-card">
       <div class="card-body text-center">
         <h1 class="card-title">
           <img id="camera"  class="camera-img" src="./icons/camera-24.png" alt="camera image">
@@ -31,24 +31,49 @@
 
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Lobster');
+
+  @media (max-width:900px) {
+
+    .container {
+      display:flex;
+      flex-direction:column;
+    }
+
+    #home-photo {
+      width:100%;
+    }
+
+    #home-actions {
+      width:100%;
+    }
+  }
+
+  @media (min-width:900px) {
+
+    .container {
+      display: flex;
+      flex-direction: row;;
+    }
+    #home-photo {
+      width:45%;
+      position: relative;
+      float:left;
+      margin-right:35px;
+    }
+
+    #home-actions {
+      width:45%;
+      position: relative;
+      float:right;
+    } 
+
+    #home-card-photo {
+      height:380px;
+    }
+  }
+
   .container {
-    min-width: 560px;
-    display:flex; 
-  }
-
-  .card {
-    width:45%;
-    height: 450px;
-    margin-bottom:45px;
-  }
-
-  .card-body {
-    display:flex;
-    flex-direction: column;
-  }
-
-  .float-left {
-    margin-right:10px;
+    width:100% 
   }
 
   .card-title {
@@ -60,29 +85,22 @@
     width:100%;
   }
 
+  .buttons{
+    width: 85%;
+    display:flex;
+    justify-content: center;
+    flex-direction: column;
+    margin: 5px auto;
+    margin-bottom: 40px;
+    }
+
   .buttons a {
     margin-left:5px;
+    margin: 5px auto;
   }
 
-  @media only screen and (max-width: 600px) {
-    .btn {
-      width: 90%;
-      margin-left:10px;
-    }
-
-    .buttons{
-      display:flex;
-      flex-direction: column;
-      margin-bottom: 40px;
-    }
-  }
-
-  @media only screen and (min-width: 601px) {
-    .btn {
-      width: 45%;
-      margin-bottom: 40px;
-      margin-right:5px;
-    }
+  .btn-success {
+    margin-bottom:15px;
   }
 
   #camera {
@@ -92,7 +110,6 @@
 
   #home-card-photo {
     width: 100% !important;
-    height:450px !important;
     border-radius: 5px !important;
   }
 
