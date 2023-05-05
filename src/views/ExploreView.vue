@@ -198,7 +198,12 @@
   .preview {
     width: 100%;
     justify-content: center;
-    margin:25px auto;
+    margin:auto auto 15px auto;
+  }
+
+  #preview-image {
+    width:100%;
+    height:400px;
   }
 
   input[type="file"] {
