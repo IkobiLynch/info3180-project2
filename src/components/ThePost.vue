@@ -1,6 +1,6 @@
 <template>
     <div id="component" class="container">
-        <div class="card col-sm-12 col-md-9">
+        <div class="card">
             <div class="card-header">
                 <div class="profile_pic flex-start">
                     <img class="" :src="`../../uploads/${post.profile_photo}`" alt="profile_pic">
@@ -52,7 +52,7 @@
 <style scoped>
 
     #component {
-        min-width: 800px;
+        min-width: 100%;
     }
 
     .card {

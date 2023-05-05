@@ -149,7 +149,8 @@
         data-target="#addpostmodal">
         New Post
       </button>
-          <ThePost #default class="float-start" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" v-on:like="like(index)" @unlike="unlike(index)" />   <div id="addpostmodal" class="modal fade">
+        <ThePost #default class="float-start" v-for="(post, index) in posts" v-bind:post="post" v-bind:key="index" v-on:like="like(index)" @unlike="unlike(index)" />   
+        <div id="addpostmodal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -248,7 +249,8 @@
     .new_post {
       position:absolute;
       justify-content: center;
-      width:400px;
+      width:85%;
+      max-width:400px;
       top: 150px;
       left: auto;
       right:auto;
