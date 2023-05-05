@@ -196,15 +196,9 @@
 <style scoped>
 
   .preview {
-    width: fit-content;
-    /* height: 200px; */
+    width: 100%;
     justify-content: center;
-    margin:auto auto 15px auto;
-  }
-
-  #preview-image {
-    width:100%;
-    max-height:250px;
+    margin:25px auto;
   }
 
   input[type="file"] {
