@@ -27,7 +27,7 @@
                 <RouterLink class="text-white" to="/explore">Explore</RouterLink>
               </li>
               <li v-if="login" >
-                <RouterLink class="text-white" :to="`/users/${id}`">My Profile</RouterLink>
+                <a class="text-white" :href="`/users/${id}`">My Profile</a>
               </li>
               <li v-if="login" >
                 <a class="text-white" @click="logout">Logout</a>
