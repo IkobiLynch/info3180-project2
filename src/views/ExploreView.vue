@@ -238,7 +238,8 @@
   }
 
   .new_post {
-    position:relative;
+    position:sticky;
+    top:70px;
     float:right;
     margin-right:20px;
     width:250px;
